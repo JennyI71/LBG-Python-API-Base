@@ -1,26 +1,51 @@
 pipeline {
+
     agent any
-    stages {
-        stage('Build') {
-            steps {
-                sh '''
-                docker build -t lbg7-20220905/lbg-api:latest -t imcalled/lbg-api:$BUILD_NUMBER . 
-                docker push lbg7-20220905/lbg-api:latest
-                docker push lbg7-20220905/lbg-api:$BUILD_NUMBER
-                docker tag lbg7-20220905/lbg-api:latest gcr.io/lbg7-20220905/kun-lbg:v1
-                docker push lbg7-20220905/lbg-api:latest gcr.io/lbg7-20220905/kun-lbg:v1
-                '''
-           }
-        }
-        stage('Deploy') {
-            steps {
-                sh '''
-                ssh -i '~/.ssh/id_rsa' jenkins@35.242.152.138 << EOF
-                docker stop lbg-container
-                docker rm lbg-container
-                docker run -d -p 8080:8080 --name lbg-container lbg7-20220905/lbg-api:latest
-                '''
-            }
-        }
+
+    environment {
+
+        GCR_CREDENTIALS_ID = 'gcp' // The ID you provided in Jenkins credentials
+
+        IMAGE_NAME = 'test-image-5'
+
+        GCR_URL = 'gcr.io/lbg-uplift-project'
+
     }
+
+    stages {
+
+        stage('Build and Push to GCR') {
+
+    steps {
+
+        script {
+
+            // Authenticate with Google Cloud
+
+            withCredentials([file(credentialsId: GCR_CREDENTIALS_ID, variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+
+                sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+
+            }
+
+            // Configure Docker to use gcloud as a credential helper
+
+            sh 'gcloud auth configure-docker --quiet'
+
+            // Build the Docker image
+
+            sh "docker build -t ${GCR_URL}/${IMAGE_NAME}:${BUILD_NUMBER} ."
+
+            // Push the Docker image to GCR
+
+            sh "docker push ${GCR_URL}/${IMAGE_NAME}:${BUILD_NUMBER}"
+
+        }
+
+    }
+
+        }
+
+    }
+
 }
