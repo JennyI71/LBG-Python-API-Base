@@ -6,9 +6,9 @@ pipeline {
 
         GCR_CREDENTIALS_ID = 'project3-ji' // The ID you provided in Jenkins credentials
 
-        IMAGE_NAME = 'lbg'
+        IMAGE_NAME = 'ji-project3'
 
-        GCR_URL = 'gcr.io/lbg-mea-18/ji-project3'
+        GCR_URL = 'gcr.io/lbg-mea-18'
 
     }
 
