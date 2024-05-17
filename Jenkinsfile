@@ -16,7 +16,7 @@ pipeline {
 
         LOCATION = 'europe-west2-c'
 
-        CREDENTIALS_ID = 'cluster-ji-project3'
+        CREDENTIALS_ID = 'k8sclusterprivatekey'
 
     }
 
